@@ -80,20 +80,18 @@ class Blueprint():
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--template-dir', help='Location of Blueprints')
-    parser.add_argument('-b', '--base-template', help='The base template')
+    parser.add_argument('-t', '--template-dir', help='Location of Blueprints', required=True)
+    parser.add_argument('-b', '--base-template', help='The base template', required=True)
     parser.add_argument('-s', '--stream-only', action='store_true',
-        help='Produce an unrendered single Jinja template')
+                        help='Produce an unrendered single Jinja template'
+    )
+    parser.add_argument('-e', '--template-ext', help='Template extension', default='.j2')
     args = parser.parse_args()
-
-    template_dir = '/Users/currand/code/blueprint_configs/routers/junos/cli'
-    template_suffix = '.j2'
-    base_template = 'base.j2'
 
     bp = Blueprint(args.template_dir, args.base_template)
 
     if args.stream_only is True:
         print(junos_indent(bp.get_stream()))
     else:
-        rendered = bp.render_template(base_template)
+        rendered = bp.render_template(args.base_template)
         print(junos_indent(rendered))
