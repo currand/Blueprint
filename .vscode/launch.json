@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Render template",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-t", "/Users/currand/code/blueprint_configs/routers/junos/cli",
+                     "-b", "base.j2"
+            ]
+        },
+        {
+            "name": "Python: Don't render",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-t", "/Users/currand/code/blueprint_configs/routers/junos/cli",
+                "-b", "base.j2",
+                "-s"
+            ]
+        }
+    ]
+}
