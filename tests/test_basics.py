@@ -20,3 +20,9 @@ def test_template_list(blueprint):
     ]
 
     assert blueprint.templates.sort() == templates.sort()
+
+def test_build_stream(blueprint):
+    output = "some text\n\n{% for x in y -%}\n\n {{ x }}\n\n{% endfor -%}\n\n{%- include '/child/child.j2' -%}"
+    
+    stream = blueprint._build_stream('parent.j2')
+    assert stream == output

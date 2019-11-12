@@ -28,8 +28,7 @@ class Blueprint():
         # Filter function for template loader
         if self.template_suffix in name:
             return True
-        else:
-            return False
+
 
     def _build_stream(self, base_template):
         """
@@ -43,7 +42,7 @@ class Blueprint():
             self._stream_out = []
             parent = True
 
-        include_re = re.compile('^.*\{\%\s+include\s+\"/(.*)\".*$', re.IGNORECASE)
+        include_re = re.compile('^.*\{\%\-?\s+include\s+[\'\"]/(.*)[\"\'].*$', re.IGNORECASE)
 
         with open(os.path.join(self.template_dir,base_template), 
                                 'r') as base_fh:
@@ -53,9 +52,12 @@ class Blueprint():
             b_line.rstrip()
             matches = include_re.match(b_line)
             if matches is not None:
-                self._build_stream(os.path.join(
-                    self.template_dir, matches.group(1)
-                ))
+                self._build_stream(
+            #        os.path.join(
+            #        self.template_dir, 
+                    matches.group(1)
+            #    )
+            )
             else:
                 self._stream_out.append(b_line)
 
