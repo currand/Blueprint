@@ -52,12 +52,7 @@ class Blueprint():
             b_line.rstrip()
             matches = include_re.match(b_line)
             if matches is not None:
-                self._build_stream(
-            #        os.path.join(
-            #        self.template_dir, 
-                    matches.group(1)
-            #    )
-            )
+                self._build_stream(matches.group(1))
             else:
                 self._stream_out.append(b_line)
 
@@ -85,7 +80,7 @@ class Blueprint():
         return json.dumps(out, indent=2)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': #pragma no coverage
 
     parser = argparse.ArgumentParser()
     exclusive = parser.add_argument_group('output types')
