@@ -71,16 +71,6 @@ class Blueprint():
 
         return self._build_stream(base_template)
 
-    def combine_without_render(self, template):
-        env = RelEnvironment(
-            loader=FileSystemLoader(self.template_dir),
-            variable_start_string='{[(*&',
-            variable_end_string='&*)]}'
-        )
-
-        template = env.get_template(template)
-        return template.render()
-
     def render_template(self, template, **kwargs):
         
         template = self.env.get_template(template)
@@ -105,8 +95,5 @@ if __name__ == '__main__':
     if args.stream_only is True:
         print(junos_indent(bp.get_stream()))
     else:
-        out = (bp.combine_without_render(base_template))
-        print(junos_indent(out))
-        print('-----------')
         rendered = bp.render_template(base_template)
         print(junos_indent(rendered))
