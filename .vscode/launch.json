@@ -24,6 +24,17 @@
                 "-b", "base.j2",
                 "-s"
             ]
+        },
+        {
+            "name": "Python: Jinja to schema",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["-t", "/Users/currand/code/blueprint_configs/routers/junos/cli",
+                "-b", "base.j2",
+                "-v"
+            ]
         }
     ]
 }

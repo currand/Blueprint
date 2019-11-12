@@ -1,2 +1,2 @@
 Jinja2==2.10.3
-MarkupSafe==1.1.1
+jinja2schema==0.1.4

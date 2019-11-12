@@ -1,8 +1,9 @@
 import argparse
 import re
 import os
+import jinja2schema
+import json
 from jinja2 import FileSystemLoader, FunctionLoader, meta
-from jinja2schema import infer
 from helpers import RelEnvironment, junos_indent
 
 class Blueprint():
@@ -76,22 +77,37 @@ class Blueprint():
         template = self.env.get_template(template)
         return template.render(kwargs)
 
+    def get_variables(self):
+        template = self._build_stream(self.base_template)
+        out = jinja2schema.to_json_schema(jinja2schema.infer(template))
+        return json.dumps(out, indent=2)
+
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
+    exclusive = parser.add_argument_group('output types')
+    group1 = exclusive.add_mutually_exclusive_group()
     parser.add_argument('-t', '--template-dir', help='Location of Blueprints', required=True)
     parser.add_argument('-b', '--base-template', help='The base template', required=True)
-    parser.add_argument('-s', '--stream-only', action='store_true',
+    group1.add_argument('-s', '--stream-only', action='store_true',
                         help='Produce an unrendered single Jinja template'
     )
-    parser.add_argument('-e', '--template-ext', help='Template extension', default='.j2')
+    parser.add_argument('-e', '--template-ext', help='Template extension. Default = ".j2"',
+                        default='.j2'
+    )
+    group1.add_argument('-v', '--get-vars', help='Return schema of variables for a rendered template',
+                        action='store_true'
+    )
+
     args = parser.parse_args()
 
     bp = Blueprint(args.template_dir, args.base_template)
 
     if args.stream_only is True:
         print(junos_indent(bp.get_stream()))
+    elif args.get_vars is True:
+        print(bp.get_variables())
     else:
         rendered = bp.render_template(args.base_template)
         print(junos_indent(rendered))
