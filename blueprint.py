@@ -72,9 +72,9 @@ class Blueprint():
 
         return self._build_stream(base_template)
 
-    def render_template(self, template, **kwargs):
+    def render_template(self, **kwargs):
         
-        template = self.env.get_template(template)
+        template = self.env.get_template(self.base_template)
         return template.render(kwargs)
 
     def get_variables(self):
@@ -102,12 +102,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    bp = Blueprint(args.template_dir, args.base_template)
+    bp = Blueprint(template_dir=args.template_dir, base_template=args.base_template)
 
     if args.stream_only is True:
         print(junos_indent(bp.get_stream()))
     elif args.get_vars is True:
         print(bp.get_variables())
     else:
-        rendered = bp.render_template(args.base_template)
-        print(junos_indent(rendered))
+        rendered = bp.render_template()
+        print(rendered)
