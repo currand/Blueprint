@@ -1,17 +1,25 @@
 ## Overview
 Blueprint is a configuration management system for CLI and other typed of text based configurations. It is meant to ease the inclusion of text-based configurations in documentation and downstream automation systems.
 
+## Installation
+- Clone this repo
+- Clone one of the [template repos](blueprint/routers) or create your own templates locally
+
 ## Requirements
 - Python 3
 - Jinja2
 - PyYAML
+- Jinja2Schema
+
 ```bash
 pip install -r requirements.txt
 ```
+
 ## Testing
 ### Requirements
 - PyTest
 - Pytest-Coverage
+
 ```bash
 $ pytest
 ============================================================================= test session starts ==============================================================================
@@ -51,6 +59,10 @@ output types:
                         A file containing config variables
  ```
 ###  Generate a config
+The following two files are [Jinja2 templates](https://jinja.palletsprojects.com/en/2.10.x/) with a parent/child relationship. The parent template `parent.j2` uses a standard `{% include "<filename>" %}` to include other files at the chosen location. The output can then be given in several different formats.
+
+#### Example Files
+
 ```parent.j2```:
 ```jinja2
 some text
@@ -77,6 +89,8 @@ things:
 ```
 
 ####  Generate a config with variables
+This will take a YAML file `tests/vars.yaml` with variables as input for the template. The output will be a rendered configuration based on these variables.
+
 ```bash
 python blueprint.py -t tests/templates -b parent.j2 -c tests/vars.yaml
     some text
@@ -84,26 +98,41 @@ python blueprint.py -t tests/templates -b parent.j2 -c tests/vars.yaml
     item bar
     item baz
     ```
-    #### Generate an unrendered config template in Jinja2
-    ```bash
-    $ python blueprint.py -t tests/templates -b parent.j2 -s
-    some text
-    {% for x in y -%}
-    {{ x }}
-    {% endfor -%}
-    {% if things is not defined -%}
-    {% set things = [0,1,2] -%}
-    {% endif -%}
-    {% for thing in things -%}
-    item {{ thing }}
-    {% endfor -%}
-```
-#### Generate a list of variables
+#### Generate an unrendered config template in Jinja2
+In the event you want the compiled template with the variables un-rendered. You can choose any template in the directory tree as the starting point
+
+
 ```bash
- $ python blueprint.py -t tests/templates -b parent.j2 -v
+$ python blueprint.py -t tests/templates -b parent.j2 -s
+some text
+{% for x in y -%}
+{{ x }}
+{% endfor -%}
+{% if things is not defined -%}
+{% set things = [0,1,2] -%}
+{% endif -%}
+{% for thing in things -%}
+item {{ thing }}
+{% endfor -%}
+$ python blueprint.py -t tests/templates -b child/child.j2 -s
+{% if things is not defined -%}
+{% set things = [0,1,2] -%}
+{% endif -%}
+{% for thing in things -%}
+item {{ thing }}
+{% endfor -%}
+```
+
+#### Generate a list of variables
+Generate a list of possible variables and their infered types from all compiled templates
+
+```bash
+$ python blueprint.py -t tests/templates -b parent.j2 -v
 {'things': [<number>], 'y': [<scalar>]}
 ```
+
 #### Generate a JSON schema for a template
+Generate a JSON schema file of all variables and their infered types
 ```bash
 $ python blueprint.py -t tests/templates -b parent.j2 -j
 {
