@@ -117,4 +117,4 @@ if __name__ == '__main__': #pragma no coverage
         print(json.dumps(bp.get_json_schema(), indent=2))
     else:
         rendered = bp.render_template()
-        print(rendered)
+        print(junos_indent(rendered))
