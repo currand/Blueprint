@@ -1,8 +1,8 @@
 import argparse
 import re
 import os
-import jinja2schema
 import json
+from jinja2schema import infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
 from helpers import RelEnvironment, junos_indent
 
@@ -70,15 +70,20 @@ class Blueprint():
         return self._build_stream(base_template)
 
     def render_template(self, **kwargs):
-        
         template = self.env.get_template(self.base_template)
         return template.render(kwargs)
 
-    def get_variables(self):
+    def get_variables(self, ignore_constants=True):
         template = self._build_stream(self.base_template)
-        out = jinja2schema.to_json_schema(jinja2schema.infer(template))
-        return json.dumps(out, indent=2)
+        output = infer_from_ast(parse(template), ignore_constants=ignore_constants)
+        return output
 
+    def get_json_schema(self, ignore_constants=True):
+        template = self._build_stream(self.base_template)
+        out = to_json_schema(infer_from_ast(parse(template),
+                             ignore_constants=ignore_constants)
+        )
+        return out['properties']
 
 if __name__ == '__main__': #pragma no coverage
 
@@ -93,7 +98,10 @@ if __name__ == '__main__': #pragma no coverage
     parser.add_argument('-e', '--template-ext', help='Template extension. Default = ".j2"',
                         default='.j2'
     )
-    group1.add_argument('-v', '--get-vars', help='Return schema of variables for a rendered template',
+    group1.add_argument('-v', '--get-vars', help='Return variables for a rendered template',
+                        action='store_true'
+    )
+    group1.add_argument('-j', '--json-schema', help='Return schema of variables for a rendered template',
                         action='store_true'
     )
 
@@ -105,6 +113,8 @@ if __name__ == '__main__': #pragma no coverage
         print(junos_indent(bp.get_stream()))
     elif args.get_vars is True:
         print(bp.get_variables())
+    elif args.json_schema is True:
+        print(json.dumps(bp.get_json_schema(), indent=2))
     else:
         rendered = bp.render_template()
         print(rendered)

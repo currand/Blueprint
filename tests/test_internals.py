@@ -1,8 +1,3 @@
-def test_basic_render(blueprint):
-    output = 'some text\nitem 0\nitem 1\nitem 2\n'
-    
-    assert blueprint.render_template() == output
-
 def test_template_list(blueprint):
     templates = [
         'parent.j2',
