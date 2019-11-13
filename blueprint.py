@@ -109,12 +109,15 @@ if __name__ == '__main__': #pragma no coverage
 
     bp = Blueprint(template_dir=args.template_dir, base_template=args.base_template)
 
-    if args.stream_only is True:
-        print(junos_indent(bp.get_stream()))
-    elif args.get_vars is True:
-        print(bp.get_variables())
-    elif args.json_schema is True:
-        print(json.dumps(bp.get_json_schema(), indent=2))
-    else:
-        rendered = bp.render_template()
-        print(junos_indent(rendered))
+    try:
+        if args.stream_only is True:
+            print(junos_indent(bp.get_stream()))
+        elif args.get_vars is True:
+            print(bp.get_variables())
+        elif args.json_schema is True:
+            print(json.dumps(bp.get_json_schema(), sort_keys=True ,indent=2))
+        else:
+            rendered = bp.render_template()
+            print(junos_indent(rendered))
+    except FileNotFoundError:
+        print(f'{args.template_dir}/{args.base_template} not found')
