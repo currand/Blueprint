@@ -2,6 +2,7 @@ import argparse
 import re
 import os
 import json
+import yaml
 from jinja2schema import infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
 from helpers import RelEnvironment, junos_indent
@@ -104,6 +105,10 @@ if __name__ == '__main__': #pragma no coverage
     group1.add_argument('-j', '--json-schema', help='Return schema of variables for a rendered template',
                         action='store_true'
     )
+    group1.add_argument('-c', '--config-vars',
+                        help='A file containing config variables',
+                        default=None
+    )
 
     args = parser.parse_args()
 
@@ -115,9 +120,14 @@ if __name__ == '__main__': #pragma no coverage
         elif args.get_vars is True:
             print(bp.get_variables())
         elif args.json_schema is True:
-            print(json.dumps(bp.get_json_schema(), sort_keys=True ,indent=2))
+            schema = bp.get_json_schema()
+            print(json.dumps(schema, sort_keys=True ,indent=2))
         else:
-            rendered = bp.render_template()
-            print(junos_indent(rendered))
+            if args.config_vars:
+                rendered = bp.render_template(args.config_vars)
+                print(junos_indent(rendered))
+            else:
+                rendered = bp.render_template()
+                print(junos_indent(rendered))
     except FileNotFoundError:
         print(f'{args.template_dir}/{args.base_template} not found')

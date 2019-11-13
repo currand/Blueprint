@@ -1,4 +1,6 @@
+{% if things is not defined -%}
 {% set things = [0,1,2] -%}
+{% endif -%}
 {% for thing in things -%}
  item {{ thing }}
 {% endfor -%}

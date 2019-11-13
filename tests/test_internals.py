@@ -7,7 +7,7 @@ def test_template_list(blueprint):
     assert blueprint.templates.sort() == templates.sort()
 
 def test_build_stream(blueprint):
-    output = "some text\n\n{% for x in y -%}\n\n {{ x }}\n\n{% endfor -%}\n\n{% set things = [0,1,2] -%}\n\n{% for thing in things -%}\n\n item {{ thing }}\n\n{% endfor -%}"
+    output = "some text\n\n{% for x in y -%}\n\n {{ x }}\n\n{% endfor -%}\n\n{% if things is not defined -%}\n\n{% set things = [0,1,2] -%}\n\n{% endif -%}\n\n{% for thing in things -%}\n\n item {{ thing }}\n\n{% endfor -%}"
     
     stream = blueprint._build_stream('parent.j2')
     assert stream == output
