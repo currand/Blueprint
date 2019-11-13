@@ -132,7 +132,7 @@ if __name__ == '__main__': #pragma no coverage
         else:
             if args.config_vars:
                 config_vars = load_vars(args.config_vars)
-                rendered = bp.render_template()
+                rendered = bp.render_template(**config_vars)
                 print(junos_indent(rendered))
             else:
                 rendered = bp.render_template()
