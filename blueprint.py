@@ -7,6 +7,13 @@ from jinja2schema import infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
 from helpers import RelEnvironment, junos_indent
 
+def load_vars(filename):
+    with open(filename, 'r') as fh:
+        lines = ''.join(fh.readlines())
+    
+    config = yaml.safe_load(lines)
+    return config
+
 class Blueprint():
 
     def __init__(self, template_dir='./templates', template_suffix='.j2',
@@ -124,7 +131,8 @@ if __name__ == '__main__': #pragma no coverage
             print(json.dumps(schema, sort_keys=True ,indent=2))
         else:
             if args.config_vars:
-                rendered = bp.render_template(args.config_vars)
+                config_vars = load_vars(args.config_vars)
+                rendered = bp.render_template()
                 print(junos_indent(rendered))
             else:
                 rendered = bp.render_template()

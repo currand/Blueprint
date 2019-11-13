@@ -1,3 +1,5 @@
+from blueprint import load_vars
+
 def test_basic_render(blueprint):
     output = 'some text\nitem 0\nitem 1\nitem 2\n'
     
@@ -12,6 +14,24 @@ def test_render_values(blueprint):
         ]
     }
     assert blueprint.render_template(**kwargs) == output
+
+def test_read_config_file(blueprint):
+  output = {'things': [
+        'foo',
+        'bar',
+        'baz'
+        ]
+  }
+  filename = 'tests/vars.yaml'
+
+  assert load_vars(filename) == output
+  
+def test_render_with_config(blueprint):
+  output = 'some text\nitem foo\nitem bar\nitem baz\n'
+  filename = 'tests/vars.yaml'
+  kwargs = load_vars(filename)
+
+  assert blueprint.render_template(**kwargs) == output
 
 def test_get_stream(blueprint):
     assert blueprint.get_stream() == 'some text\n\n{% for x in y -%}\n\n {{ x }}\n\n{% endfor -%}\n\n{% if things is not defined -%}\n\n{% set things = [0,1,2] -%}\n\n{% endif -%}\n\n{% for thing in things -%}\n\n item {{ thing }}\n\n{% endfor -%}'
