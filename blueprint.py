@@ -38,7 +38,7 @@ class Blueprint():
             return True
 
 
-    def _build_stream(self, base_template):
+    def _build_stream(self, base_template, comments=False):
         """
         Recursive method to build an unrendered single template from all
         sub templates included.
@@ -51,10 +51,16 @@ class Blueprint():
             parent = True
 
         include_re = re.compile('^.*\{\%\-?\s+include\s+[\'\"]/(.*)[\"\'].*$', re.IGNORECASE)
+        comment_re = re.compile('\{#[\s\w]+#\}')
 
         with open(os.path.join(self.template_dir,base_template), 
                                 'r') as base_fh:
-            base_template = base_fh.readlines()
+            base_template = base_fh.read()
+
+        if comments is False:
+            base_template = re.sub(comment_re, '', base_template)            
+        
+        base_template = base_template.split('\n')
 
         for b_line in base_template:
             b_line.rstrip()
@@ -69,13 +75,13 @@ class Blueprint():
             self._stream_out = None
             return output
 
-    def get_stream(self, base_template=None):
+    def get_stream(self, base_template=None, comments=False):
         # External callable to build an unrendered scomplete
         # template
         if base_template is None:
             base_template = self.base_template
 
-        return self._build_stream(base_template)
+        return self._build_stream(base_template, comments)
 
     def render_template(self, **kwargs):
         template = self.env.get_template(self.base_template)
@@ -96,34 +102,36 @@ class Blueprint():
 if __name__ == '__main__': #pragma no coverage
 
     parser = argparse.ArgumentParser()
-    exclusive = parser.add_argument_group('output types')
-    group1 = exclusive.add_mutually_exclusive_group()
+    exclusive1 = parser.add_argument_group('output types')
+    group1 = exclusive1.add_mutually_exclusive_group()
+    
     parser.add_argument('-t', '--template-dir', help='Location of Blueprints', required=True)
     parser.add_argument('-b', '--base-template', help='The base template', required=True)
-    group1.add_argument('-s', '--stream-only', action='store_true',
-                        help='Produce an unrendered single Jinja template'
-    )
     parser.add_argument('-e', '--template-ext', help='Template extension. Default = ".j2"',
-                        default='.j2'
-    )
+                        default='.j2')
+    
+    parser.add_argument('-s', '--stream-only', action='store_true',
+                        help='Produce an unrendered single Jinja template')
+    group1.add_argument('--comments', action='store_true',
+                        help='Include comments when using --stream-only', default=False)
     group1.add_argument('-v', '--get-vars', help='Return variables for a rendered template',
-                        action='store_true'
-    )
+                        action='store_true')
     group1.add_argument('-j', '--json-schema', help='Return schema of variables for a rendered template',
-                        action='store_true'
-    )
+                        action='store_true')
     group1.add_argument('-c', '--config-vars',
                         help='A file containing config variables',
-                        default=None
-    )
+                        default=None)
 
     args = parser.parse_args()
 
     bp = Blueprint(template_dir=args.template_dir, base_template=args.base_template)
 
+    if args.comments is True and args.stream_only is False:
+        parser.error('--comments requires -s/--stream-only')
+
     try:
         if args.stream_only is True:
-            print(junos_indent(bp.get_stream()))
+            print(junos_indent(bp.get_stream(comments=args.comments)))
         elif args.get_vars is True:
             print(bp.get_variables())
         elif args.json_schema is True:
