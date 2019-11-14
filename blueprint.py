@@ -5,13 +5,14 @@ import json
 import yaml
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
-from helpers import RelEnvironment, junos_indent
+from helpers import RelEnvironment, junos_indent, yaml_join
 
 def load_vars(filename):
     with open(filename, 'r') as fh:
         lines = ''.join(fh.readlines())
     
-    config = yaml.safe_load(lines)
+    yaml.add_constructor('!join', yaml_join)
+    config = yaml.load(lines, Loader=yaml.Loader)
     return config
 
 class Blueprint():
@@ -123,7 +124,7 @@ if __name__ == '__main__': #pragma no coverage
                         action='store_true')
     group1.add_argument('-j', '--json-schema', help='Return schema of variables for a rendered template',
                         action='store_true')
-    group1.add_argument('-c', '--config-vars',
+    parser.add_argument('-c', '--config-vars',
                         help='A file containing config variables',
                         default=None)
 
