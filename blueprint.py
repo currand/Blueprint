@@ -150,5 +150,5 @@ if __name__ == '__main__': #pragma no coverage
             else:
                 rendered = bp.render_template()
                 print(junos_indent(rendered))
-    except FileNotFoundError:
-        print(f'{args.template_dir}/{args.base_template} not found')
+    except FileNotFoundError as error:
+        print(error)
