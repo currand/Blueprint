@@ -34,8 +34,9 @@ def test_render_with_config(blueprint):
   assert blueprint.render_template(**kwargs) == output
 
 def test_get_stream(blueprint):
-    assert blueprint.get_stream() == 'some text\n\n{% for x in y -%}\n\n {{ x }}\n\n{% endfor -%}\n\n{% if things is not defined -%}\n\n{% set things = [0,1,2] -%}\n\n{% endif -%}\n\n{% for thing in things -%}\n\n item {{ thing }}\n\n{% endfor -%}'
-    assert blueprint.get_stream('child/child.j2') == '{% if things is not defined -%}\n\n{% set things = [0,1,2] -%}\n\n{% endif -%}\n\n{% for thing in things -%}\n\n item {{ thing }}\n\n{% endfor -%}'
+    assert blueprint.get_stream() == 'some text\n{% for x in y -%}\n {{ x }}\n{% endfor -%}\n{% if things is not defined -%}\n{% set things = [0,1,2] -%}\n{% endif -%}\n{% for thing in things -%}\n item {{ thing }}\n{% endfor -%}'
+    out = blueprint.get_stream('child/child.j2')
+    assert blueprint.get_stream('child/child.j2') == '{% if things is not defined -%}\n{% set things = [0,1,2] -%}\n{% endif -%}\n{% for thing in things -%}\n item {{ thing }}\n{% endfor -%}'
 
 def test_get_variables(blueprint):
     out = "{'things': [<number>], 'y': [<scalar>]}"
