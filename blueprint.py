@@ -3,7 +3,7 @@ import re
 import os
 import json
 import yaml
-from jinja2schema import infer_from_ast, to_json_schema, parse
+from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
 from helpers import RelEnvironment, junos_indent
 
@@ -88,14 +88,19 @@ class Blueprint():
         return template.render(kwargs)
 
     def get_variables(self, ignore_constants=True):
+        j2s_config = Config(BOOLEAN_CONDITIONS=True)
         template = self._build_stream(self.base_template)
-        output = infer_from_ast(parse(template), ignore_constants=ignore_constants)
+        output = infer_from_ast(parse(template),
+            ignore_constants=ignore_constants,
+            config=j2s_config)
         return output
 
     def get_json_schema(self, ignore_constants=True):
+        j2s_config = Config(BOOLEAN_CONDITIONS=True)
         template = self._build_stream(self.base_template)
         out = to_json_schema(infer_from_ast(parse(template),
-                             ignore_constants=ignore_constants)
+                             ignore_constants=ignore_constants,
+                             config=j2s_config)
         )
         return out['properties']
 
