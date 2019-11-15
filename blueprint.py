@@ -3,14 +3,21 @@ import re
 import os
 import json
 import yaml
+import sys
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
 from helpers import RelEnvironment, junos_indent, yaml_join
 
 def load_vars(filename):
+
+    if os.path.exists(filename) is False:
+        filename = os.path.join(args.template_dir, filename)
+    if os.path.exists(filename) is False:
+        sys.exit(f'Cannot find config file {filename}')
+
     with open(filename, 'r') as fh:
         lines = ''.join(fh.readlines())
-    
+
     yaml.add_constructor('!join', yaml_join)
     config = yaml.load(lines, Loader=yaml.Loader)
     return config
@@ -112,7 +119,8 @@ if __name__ == '__main__': #pragma no coverage
     group1 = exclusive1.add_mutually_exclusive_group()
     
     parser.add_argument('-t', '--template-dir', help='Location of Blueprints', required=True)
-    parser.add_argument('-b', '--base-template', help='The base template', required=True)
+    parser.add_argument('-b', '--base-template', help='The base template', required=False,
+                        default='base.j2')
     parser.add_argument('-e', '--template-ext', help='Template extension. Default = ".j2"',
                         default='.j2')
     
@@ -126,7 +134,7 @@ if __name__ == '__main__': #pragma no coverage
                         action='store_true')
     parser.add_argument('-c', '--config-vars',
                         help='A file containing config variables',
-                        default=None)
+                        const='base.yaml', nargs='?')
 
     args = parser.parse_args()
 
