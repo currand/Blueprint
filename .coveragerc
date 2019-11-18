@@ -1,5 +1,6 @@
 [run]
 branch = True
 omit = tests/*
+       setup.py
 source =
     ./

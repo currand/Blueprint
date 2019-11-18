@@ -1,35 +1,22 @@
-import argparse
 import re
 import os
 import json
 import yaml
 import sys
+import argparse
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
 from helpers import RelEnvironment, junos_indent, yaml_join
 
-def load_vars(filename):
-
-    if os.path.exists(filename) is False:
-        filename = os.path.join(args.template_dir, filename)
-    if os.path.exists(filename) is False:
-        sys.exit(f'Cannot find config file {filename}')
-
-    with open(filename, 'r') as fh:
-        lines = ''.join(fh.readlines())
-
-    yaml.add_constructor('!join', yaml_join)
-    config = yaml.load(lines, Loader=yaml.Loader)
-    return config
-
 class Blueprint():
 
     def __init__(self, template_dir='./templates', template_suffix='.j2',
-                base_template='base.j2'):
+                base_template='base.j2', values='base.yaml'):
         
         self.template_dir = template_dir
         self.template_suffix = template_suffix
         self.base_template = base_template
+        self.values = values
 
         self.env = RelEnvironment(
             loader=FileSystemLoader(self.template_dir)
@@ -45,6 +32,22 @@ class Blueprint():
         if self.template_suffix in name:
             return True
 
+
+    def _load_vars(self):
+
+        # if os.path.exists(filename) is False:
+        #     filename = os.path.join(args.template_dir, filename)
+        # if os.path.exists(filename) is False:
+        #     sys.exit(f'Cannot find config file {filename}')
+
+        filename = os.path.join(self.template_dir, self.values)
+
+        with open(filename, 'r') as fh:
+            lines = ''.join(fh.readlines())
+
+        yaml.add_constructor('!join', yaml_join)
+        config = yaml.load(lines, Loader=yaml.Loader)
+        return config
 
     def _build_stream(self, base_template, comments=False):
         """
@@ -91,9 +94,10 @@ class Blueprint():
 
         return self._build_stream(base_template, comments)
 
-    def render_template(self, **kwargs):
+    def render_template(self):
+        args = self._load_vars()
         template = self.env.get_template(self.base_template)
-        return template.render(kwargs)
+        return template.render(args)
 
     def get_variables(self, ignore_constants=True):
         j2s_config = Config(BOOLEAN_CONDITIONS=True)
@@ -134,11 +138,11 @@ if __name__ == '__main__': #pragma no coverage
                         action='store_true')
     parser.add_argument('-c', '--config-vars',
                         help='A file containing config variables',
-                        const='base.yaml', nargs='?')
+                        default='base.yaml', nargs='?')
 
     args = parser.parse_args()
 
-    bp = Blueprint(template_dir=args.template_dir, base_template=args.base_template)
+    bp = Blueprint(template_dir=args.template_dir, base_template=args.base_template, values=args.config_vars)
 
     if args.comments is True and args.stream_only is False:
         parser.error('--comments requires -s/--stream-only')
@@ -153,8 +157,7 @@ if __name__ == '__main__': #pragma no coverage
             print(json.dumps(schema, sort_keys=True ,indent=2))
         else:
             if args.config_vars:
-                config_vars = load_vars(args.config_vars)
-                rendered = bp.render_template(**config_vars)
+                rendered = bp.render_template()
                 print(junos_indent(rendered))
             else:
                 rendered = bp.render_template()

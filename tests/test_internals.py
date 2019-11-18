@@ -1,3 +1,5 @@
+from helpers import yaml_join
+
 def test_template_list(blueprint):
     templates = [
         'parent.j2',
@@ -15,3 +17,12 @@ def test_check_template_suffix(blueprint):
     assert blueprint._check_template_suffix('test.j2') is True
     assert blueprint._check_template_suffix('test.r2') is None
 
+def test_yaml_load():
+    strings = ['a', 'b']
+    class loader():
+        def construct_sequence(self, seq):
+            return seq
+    
+    loader_inst = loader()
+    assert yaml_join(loader_inst,
+                    strings) == ''.join(strings)

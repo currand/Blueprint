@@ -5,5 +5,6 @@ from blueprint import Blueprint
 def blueprint():
     return Blueprint(template_dir='tests/templates',
         base_template='parent.j2',
-        template_suffix='.j2'
+        template_suffix='.j2',
+        values='values.yaml'
     )

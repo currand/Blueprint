@@ -1,37 +1,26 @@
-from blueprint import load_vars
+import yaml
 
 def test_basic_render(blueprint):
-    output = 'some text\nitem 0\nitem 1\nitem 2\n'
+    output = 'some text\nitem foo\nitem bar\nitem baz\n'
     
     assert blueprint.render_template() == output
 
 def test_render_values(blueprint):
     output = 'some text\nitem foo\nitem bar\nitem baz\n'
-    kwargs = {'things': [
-        'foo',
-        'bar',
-        'baz'
-        ]
-    }
-    assert blueprint.render_template(**kwargs) == output
+
+    assert blueprint.render_template() == output
 
 def test_read_config_file(blueprint):
-  output = {'things': [
-        'foo',
-        'bar',
-        'baz'
-        ]
-  }
-  filename = 'tests/vars.yaml'
-
-  assert load_vars(filename) == output
+  filename = 'tests/templates/values.yaml'
+  with open(filename, 'r') as fh:
+    lines = ''.join(fh.readlines())
+  config = yaml.load(lines, Loader=yaml.Loader)
+  assert blueprint._load_vars() == config
   
 def test_render_with_config(blueprint):
   output = 'some text\nitem foo\nitem bar\nitem baz\n'
-  filename = 'tests/vars.yaml'
-  kwargs = load_vars(filename)
 
-  assert blueprint.render_template(**kwargs) == output
+  assert blueprint.render_template() == output
 
 def test_get_stream(blueprint):
     assert blueprint.get_stream() == 'some text\n{% for x in y -%}\n {{ x }}\n{% endfor -%}\n{% if things is not defined -%}\n{% set things = [0,1,2] -%}\n{% endif -%}\n{% for thing in things -%}\n item {{ thing }}\n{% endfor -%}'
