@@ -1,4 +1,3 @@
-import yaml
 
 def test_basic_render(blueprint):
     output = 'some text\nitem foo\nitem bar\nitem baz\n'
@@ -10,12 +9,6 @@ def test_render_values(blueprint):
 
     assert blueprint.render_template() == output
 
-def test_read_config_file(blueprint):
-  filename = 'tests/templates/values.yaml'
-  with open(filename, 'r') as fh:
-    lines = ''.join(fh.readlines())
-  config = yaml.load(lines, Loader=yaml.Loader)
-  assert blueprint._load_vars() == config
   
 def test_render_with_config(blueprint):
   output = 'some text\nitem foo\nitem bar\nitem baz\n'

@@ -1,12 +1,10 @@
 import re
 import os
 import json
-import yaml
-import sys
 import argparse
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
-from helpers import RelEnvironment, junos_indent, yaml_join
+from helpers import RelEnvironment, junos_indent, yaml_load
 
 class Blueprint():
 
@@ -32,22 +30,6 @@ class Blueprint():
         if self.template_suffix in name:
             return True
 
-
-    def _load_vars(self):
-
-        # if os.path.exists(filename) is False:
-        #     filename = os.path.join(args.template_dir, filename)
-        # if os.path.exists(filename) is False:
-        #     sys.exit(f'Cannot find config file {filename}')
-
-        filename = os.path.join(self.template_dir, self.values)
-
-        with open(filename, 'r') as fh:
-            lines = ''.join(fh.readlines())
-
-        yaml.add_constructor('!join', yaml_join)
-        config = yaml.load(lines, Loader=yaml.Loader)
-        return config
 
     def _build_stream(self, base_template, comments=False):
         """
@@ -95,7 +77,7 @@ class Blueprint():
         return self._build_stream(base_template, comments)
 
     def render_template(self):
-        args = self._load_vars()
+        args = yaml_load(self.template_dir, self.values)
         template = self.env.get_template(self.base_template)
         return template.render(args)
 

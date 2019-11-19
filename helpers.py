@@ -1,5 +1,9 @@
 import os
 import re
+import csv
+import sys
+import yaml
+import json
 from jinja2 import Environment
 
 class RelEnvironment(Environment): #pragma no coverage
@@ -34,3 +38,34 @@ def junos_indent(template):
 def yaml_join(loader, node):
     seq = loader.construct_sequence(node)
     return ''.join([str(i) for i in seq])
+
+def csv_load(template_dir, values):
+    config = {}
+
+    if os.path.exists(values) is False:
+        values = os.path.join(template_dir, values)
+        if os.path.exists(values) is False:
+            sys.exit(f'File {values} does not exist')
+
+    with open(values, newline='') as csvfile:
+        csv_reader = csv.DictReader(csvfile)
+        config['data'] = [dict(d) for d in csv_reader]
+
+    return config
+
+def yaml_load(template_dir, values):
+
+    if os.path.exists(values) is False:
+        values = os.path.join(template_dir, values)
+        if os.path.exists(values) is False:
+            sys.exit(f'File {values} does not exist')
+    
+    
+    with open(values, 'r') as fh:
+        lines = ''.join(fh.readlines())            
+
+        
+
+    yaml.add_constructor('!join', yaml_join)
+    config = yaml.load(lines, Loader=yaml.Loader)
+    return config
