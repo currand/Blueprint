@@ -4,7 +4,7 @@ import json
 import argparse
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
-from helpers import RelEnvironment, junos_indent, yaml_load
+from helpers import RelEnvironment, junos_indent, yaml_load, csv_load
 
 class Blueprint():
 
@@ -77,7 +77,13 @@ class Blueprint():
         return self._build_stream(base_template, comments)
 
     def render_template(self):
-        args = yaml_load(self.template_dir, self.values)
+        filetype = self.values.split('.')
+
+        if filetype[-1] == 'yaml':
+            args = yaml_load(self.template_dir, self.values)
+        elif filetype[1] == 'csv':
+            args = csv_load(self.template_dir, self.values)
+    
         template = self.env.get_template(self.base_template)
         return template.render(args)
 
@@ -119,7 +125,7 @@ if __name__ == '__main__': #pragma no coverage
     group1.add_argument('-j', '--json-schema', help='Return schema of variables for a rendered template',
                         action='store_true')
     parser.add_argument('-c', '--config-vars',
-                        help='A file containing config variables',
+                        help='A CSV or YAML file containing config variables. Must end in either .csv or .yaml',
                         default='base.yaml', nargs='?')
 
     args = parser.parse_args()
