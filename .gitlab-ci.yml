@@ -31,4 +31,4 @@ test:
 
 run:
   script:
-  - python blueprint.py -t tests/templates -b parent.j2 -s 
+  - python blueprintcli/blueprintcli.py -t tests/templates -b parent.j2 -s 
