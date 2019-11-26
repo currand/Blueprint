@@ -1,6 +1,6 @@
 import yaml
 import pytest
-from helpers import junos_indent, yaml_join, csv_load, yaml_load
+from blueprint import junos_indent, yaml_join, csv_load, yaml_load
 
 def test_helper_junos_indent():
     in_temp = "{\n{\n{\ntest indent;\n}\n}\n}"

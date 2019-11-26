@@ -4,7 +4,7 @@ import json
 import argparse
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
 from jinja2 import FileSystemLoader, FunctionLoader, meta
-from helpers import RelEnvironment, junos_indent, yaml_load, csv_load
+from .helpers import RelEnvironment, junos_indent, yaml_load, csv_load
 
 class Blueprint():
 
