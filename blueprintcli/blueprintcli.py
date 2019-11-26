@@ -47,5 +47,6 @@ try:
         else:
             rendered = bp.render_template()
             print(junos_indent(rendered))
+            
 except FileNotFoundError as error:
     print(error)

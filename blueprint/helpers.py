@@ -21,7 +21,6 @@ def junos_indent(template):
     outdent_re = re.compile('(?<!\})\}(?!\})\s?')
 
     lines = template.split('\n')
-    lines = [x for x in lines if x.strip() != '']
     for i in range(0, len(lines)):
         lines[i] = lines[i].lstrip()
         if indent_re.match(lines[i]):

@@ -3,7 +3,7 @@ import os
 import json
 import argparse
 from jinja2schema import Config, infer_from_ast, to_json_schema, parse
-from jinja2 import FileSystemLoader, FunctionLoader, meta
+from jinja2 import FileSystemLoader, FunctionLoader, meta, select_autoescape
 from .helpers import RelEnvironment, junos_indent, yaml_load, csv_load
 
 class Blueprint():
@@ -56,7 +56,7 @@ class Blueprint():
         base_template = base_template.split('\n')
 
         for b_line in base_template:
-            b_line.rstrip()
+            # b_line.rstrip()
             matches = include_re.match(b_line)
             if matches is not None:
                 self._build_stream(matches.group(1))
@@ -103,4 +103,3 @@ class Blueprint():
                              config=j2s_config)
         )
         return out['properties']
-        
