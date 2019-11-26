@@ -17,7 +17,8 @@ class Blueprint():
         self.values = values
 
         self.env = RelEnvironment(
-            loader=FileSystemLoader(self.template_dir)
+            loader=FileSystemLoader(self.template_dir),
+            extensions=['jinja2_time.TimeExtension']
         )
 
         self.templates = self.env.list_templates(
