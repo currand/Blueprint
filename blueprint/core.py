@@ -77,13 +77,15 @@ class Blueprint():
 
         return self._build_stream(base_template, comments)
 
-    def render_template(self):
-        filetype = self.values.split('.')
+    def render_template(self, args=None):
+        
 
-        if filetype[-1] == 'yaml':
-            args = yaml_load(self.template_dir, self.values)
-        elif filetype[1] == 'csv':
-            args = csv_load(self.template_dir, self.values)
+        if args is None:
+            filetype = self.values.split('.')
+            if filetype[-1] == 'yaml':
+                args = yaml_load(self.template_dir, self.values)
+            elif filetype[1] == 'csv':
+                args = csv_load(self.template_dir, self.values)
     
         template = self.env.get_template(self.base_template)
         return template.render(args)
