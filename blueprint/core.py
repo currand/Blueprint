@@ -10,6 +10,14 @@ class Blueprint():
 
     def __init__(self, template_dir='./templates', template_suffix='.j2',
                 base_template='base.j2', values='base.yaml'):
+        """A Blueprint class to render templates based on Jinja
+        
+        Keyword Arguments:
+            template_dir {str} -- The base template directory (default: {'./templates'})
+            template_suffix {str} -- The template suffix (default: {'.j2'})
+            base_template {str} -- The base Jinja template (default: {'base.j2'})
+            values {str} -- A confg file to render a Blueprint template (default: {'base.yaml'})
+        """
         
         self.template_dir = template_dir
         self.template_suffix = template_suffix
@@ -27,15 +35,33 @@ class Blueprint():
         self._stream_out = None
 
     def _check_template_suffix(self, name):
-        # Filter function for template loader
+        """A filter function for Jinja template loader. When used
+        Jinja will only return templates with the suffix provided,
+        ignoring any other files (like YAML or other artifacts)
+        
+        Arguments:
+            name {str} -- Template suffix
+        
+        Returns:
+            bool -- Returns true if the suffix is in the template name
+        """
         if self.template_suffix in name:
             return True
 
 
     def _build_stream(self, base_template, comments=False):
-        """
-        Recursive method to build an unrendered single template from all
-        sub templates included.
+        """Recursive method to build an unrendered single template from all
+        sub templates included. Recursivley combines templates from sub-dirs
+        and removes comments from headers and in line where applicable
+        
+        Arguments:
+            base_template {str} -- The base template
+        
+        Keyword Arguments:
+            comments {bool} -- Whether to render comments or not (default: {False})
+        
+        Returns:
+            {str} -- Return the rendered single template 
         """
 
         parent = False
@@ -57,7 +83,6 @@ class Blueprint():
         base_template = base_template.split('\n')
 
         for b_line in base_template:
-            # b_line.rstrip()
             matches = include_re.match(b_line)
             if matches is not None:
                 self._build_stream(matches.group(1))
@@ -70,15 +95,32 @@ class Blueprint():
             return output
 
     def get_stream(self, base_template=None, comments=False):
-        # External callable to build an unrendered scomplete
-        # template
+        """Output only the stream and do not render variables. This
+        can also render a single template or templates starting farther
+        down in the tree than the base template
+        
+        Keyword Arguments:
+            base_template {str} -- The base template if different from the default (default: {None})
+            comments {bool} -- Renders comments if True (default: {False})
+        
+        Returns:
+            {str} -- Returns a "stream" or unrendered template
+        """
         if base_template is None:
             base_template = self.base_template
 
         return self._build_stream(base_template, comments)
 
     def render_template(self, args=None):
+        """Renders a template with supplied arguments. The arguments can
+        either come from a supplied file or via a dict
         
+        Keyword Arguments:
+            args {dict} -- An arguments dict (default: {None})
+        
+        Returns:
+            str -- A rendered template
+        """
 
         if args is None:
             filetype = self.values.split('.')
@@ -91,6 +133,15 @@ class Blueprint():
         return template.render(args)
 
     def get_variables(self, ignore_constants=True):
+        """Uses the json2schema library to find all variables in a
+        template and attempt to infer a type.
+        
+        Keyword Arguments:
+            ignore_constants {bool} -- Ignoring constants prevents printing of loop controls, etc. (default: {True})
+        
+        Returns:
+            {str} -- A list of Variables found in the template. Useful for building config files
+        """
         j2s_config = Config(BOOLEAN_CONDITIONS=True)
         template = self._build_stream(self.base_template)
         output = infer_from_ast(parse(template),
@@ -99,6 +150,14 @@ class Blueprint():
         return output
 
     def get_json_schema(self, ignore_constants=True):
+        """Build a JSON schema from a template
+        
+        Keyword Arguments:
+            ignore_constants {bool} -- Ignoring constants prevents printing of loop controls, etc.  (default: {True})
+        
+        Returns:
+            [type] -- [description]
+        """
         j2s_config = Config(BOOLEAN_CONDITIONS=True)
         template = self._build_stream(self.base_template)
         out = to_json_schema(infer_from_ast(parse(template),
