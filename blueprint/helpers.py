@@ -12,10 +12,14 @@ class RelEnvironment(Environment): #pragma no coverage
         return os.path.join(os.path.dirname(parent), template)
 
 def junos_indent(template):
-    '''
-    A function to strip whitespace and indent templates
-    in a JUNOS style
-    '''
+    """A function to strip whitespace and indent JUNOS stype
+    
+    Arguments:
+        template {str} -- The input template (rendered or not) as a string
+    
+    Returns:
+        str -- The indented template
+    """
     indent = -1
     indent_re = re.compile('^\s?.*(?<!\{)\{(?!\{)\s?$')
     outdent_re = re.compile('(?<!\})\}(?!\})\s?')
@@ -35,6 +39,18 @@ def junos_indent(template):
     return '\n'.join(lines)
 
 def yaml_join(loader, node):
+    """Load a YAML config file. Adds a construct_squence that will
+    join values from a previous node. This enables reuse of a previously
+    set variable. For example:
+
+    REGION: &REGION 2
+    HOSTNAME_FULL: &HOSTNAME_FULL arr01.fake.wv
+    DESCRIPTION: !join ['_LB_, ', *HOSTNAME_FULL,' ', *REGION]
+
+    will render:
+
+    '_LB_,  arr01.fake.wv, 2'
+    """
     seq = loader.construct_sequence(node)
     return ''.join([str(i) for i in seq])
 
@@ -53,6 +69,15 @@ def csv_load(template_dir, values):
     return config
 
 def yaml_load(template_dir, values):
+    """Load config values from a YAML file
+    
+    Arguments:
+        template_dir {str} -- The base template dir
+        values {str} -- The config file name
+    
+    Returns:
+        dict -- A dict of values
+    """
 
     if os.path.exists(values) is False:
         values = os.path.join(template_dir, values)
@@ -62,8 +87,6 @@ def yaml_load(template_dir, values):
     
     with open(values, 'r') as fh:
         lines = ''.join(fh.readlines())            
-
-        
 
     yaml.add_constructor('!join', yaml_join)
     config = yaml.load(lines, Loader=yaml.Loader)
